@@ -3,87 +3,92 @@
 #include <string>
 #include <algorithm>
 #include <cmath>
+#include <cctype>
 
-unsigned int faStr1(const char* str) {
-    std::string word;
-    unsigned int countWordsWithoutDigits = 0;
 
-    // Разбиваем строку на слова
-    for (const char* p = str; *p; ++p) {
-        if (*p == ' ') {
-            // Проверяем, содержит ли слово цифры
-            if (!word.empty() && std::none_of(word.begin(), word.end(), ::isdigit)) {
-                countWordsWithoutDigits++;
+unsigned int faStr1(const char *str) {
+    bool hasDigit = false;
+    bool inWord = false;
+    int wordCount = 0;
+
+    for (int i = 0; str[i]; ++i) {
+        if (str[i] != ' ') {
+            inWord = true;
+            if (!hasDigit && isdigit(str[i])) {
+                hasDigit = true;
             }
-            word.clear();
         } else {
-            word += *p;
+            if (inWord && !hasDigit) {
+                wordCount++;
+            }
+            inWord = false;
+            hasDigit = false;
         }
     }
-    // Проверяем последнее слово
-    if (!word.empty() && std::none_of(word.begin(), word.end(), ::isdigit)) {
-        countWordsWithoutDigits++;
+    if (inWord && !hasDigit) {
+        wordCount++;
     }
-
-    return countWordsWithoutDigits;
+    return wordCount;
 }
 
-unsigned int faStr2(const char* str) {
-    std::string word;
-    unsigned int countWordsCapitalLower = 0;
+unsigned int faStr2(const char *str) {
+    bool startsWithUppercase = false;
+    bool inWord = false;
+    bool isFirstWord = true;
+    int wordCount = 0;
 
-    // Разбиваем строку на слова
-    for (const char* p = str; *p; ++p) {
-        if (*p == ' ') {
-            // Проверяем, начинается ли слово с заглавной буквы
-            if (!word.empty() && std::isupper(word[0])) {
-                // Проверяем, состоит ли слово только из строчных латинских букв
-                if (word.length() == 1 || std::all_of(word.begin() + 1, word.end(), ::islower)) {
-                    countWordsCapitalLower++;
-                }
+    for (int i = 0; str[i]; ++i) {
+        if (str[i] != ' ') {
+            inWord = true;
+            if (isFirstWord && isupper(str[i])) {
+                startsWithUppercase = true;
+                isFirstWord = false;
+            } else if (startsWithUppercase && !islower(str[i])) {
+                startsWithUppercase = false;
             }
-            word.clear();
         } else {
-            word += *p;
+            if (inWord && startsWithUppercase) {
+                wordCount++;
+            }
+            inWord = false;
+            isFirstWord = true;
+            startsWithUppercase = false;
         }
     }
-    // Проверяем последнее слово
-    if (!word.empty() && std::isupper(word[0])) {
-        if (word.length() == 1 || std::all_of(word.begin() + 1, word.end(), ::islower)) {
-            countWordsCapitalLower++;
-        }
+    if (inWord && startsWithUppercase) {
+        wordCount++;
     }
-
-    return countWordsCapitalLower;
+    return wordCount;
 }
 
-unsigned int faStr3(const char* str) {
-    unsigned int totalWordLength = 0;
-    unsigned int wordCount = 0;
-    unsigned int lastWordLength = 0;
+unsigned int faStr3(const char *str) {
+    bool inWord = false;
+    int wordLength = 0;
+    int totalWordLength = 0;
+    int wordCount = 0;
 
-    // Разбиваем строку на слова
-    for (const char* p = str; *p; ++p) {
-        if (*p == ' ') {
-            // Увеличиваем сумму длин слов
-            totalWordLength += lastWordLength;
-            wordCount++; // Увеличиваем счетчик слов
-            lastWordLength = 0; // Сбрасываем счетчик для следующего слова
+    for (int i = 0; str[i]; ++i) {
+        if (str[i] != ' ') {
+            if (!inWord) {
+                inWord = true;
+                wordCount++;
+            }
+            wordLength++;
         } else {
-            lastWordLength++; // Увеличиваем длину текущего слова
+            inWord = false;
+            totalWordLength += wordLength;
+            wordLength = 0;
         }
     }
-    // Проверяем последнее слово
-    if (lastWordLength > 0) {
-        totalWordLength += lastWordLength;
-        wordCount++; // Увеличиваем счетчик слов
+
+    if (inWord) {
+        totalWordLength += wordLength;
     }
 
-    // Находим среднюю длину слова
-    double averageWordLength = static_cast<double>(totalWordLength) / static_cast<double>(wordCount);
+    if (wordCount == 0) {
+        return 0; // Избегаем деления на ноль
+    }
 
-    // Округляем до целого значения
-    unsigned int roundedAverageWordLength = static_cast<unsigned int>(std::round(averageWordLength));
-
-    return roundedAverageWordLength;
+    int averageWordLength = round(static_cast<double>(totalWordLength) / static_cast<double>(wordCount));
+    return averageWordLength;
 }
