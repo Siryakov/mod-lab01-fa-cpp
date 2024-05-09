@@ -89,6 +89,7 @@ unsigned int faStr3(const char *str) {
         return 0; // Избегаем деления на ноль
     }
 
-    int averageWordLength = round(static_cast<double>(totalWordLength) / static_cast<double>(wordCount));
+    int averageWordLength = round(static_cast<double>(totalWordLength)
+    / static_cast<double>(wordCount));
     return averageWordLength;
 }
